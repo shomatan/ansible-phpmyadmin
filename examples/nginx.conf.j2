@@ -13,12 +13,8 @@ server {
     root {{ phpmyadmin_working_dir }};
     index index.php;
 
-    {% if phpmyadmin_allow_hosts | length > 0 %}
-    {% for item in phpmyadmin_allow_hosts %}
-      allow {{ item }};
-    {% endfor %}
-      deny all;
-    {% endif %}
+    #allow 192.168.1.0/24;
+    #deny all;
 
     location ~ \.php$ {
       fastcgi_split_path_info       ^(.+\.php)(/.+)$;

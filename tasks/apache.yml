@@ -1,9 +1,0 @@
----
-- name: Place phpMyAdmin vhosts configuration file.
-  template:
-    src: apache.conf.j2
-    dest: /etc/httpd/conf.d/phpmyadmin.conf
-    owner: "{{ phpmyadmin_web_user }}"
-    group: "{{ phpmyadmin_web_group }}"
-    mode: 00600
-  notify: restart {{ phpmyadmin_webserver_type }}

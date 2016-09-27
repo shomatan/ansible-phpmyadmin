@@ -1,9 +1,0 @@
----
-- name: Place phpMyAdmin vhosts configuration file.
-  template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/conf.d/phpmyadmin.conf
-    owner: "{{ phpmyadmin_web_user }}"
-    group: "{{ phpmyadmin_web_group }}"
-    mode: 00644
-  notify: reload {{ phpmyadmin_webserver_type }}

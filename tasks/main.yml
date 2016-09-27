@@ -59,6 +59,3 @@
     group: "{{ phpmyadmin_web_group }}"
     mode: 00600
   when: secret_empty.stdout == "1"
-
-# web server
-- include: "{{ phpmyadmin_webserver_type }}.yml"
