@@ -5,3 +5,4 @@ phpmyadmin_web_group: "{{ phpmyadmin_webserver_type }}"
 
 phpmyadmin_working_dir: /var/www
 phpmyadmin_install_dir: /var/www/phpmyadmin
+phpmyadmin_allow_hosts: []

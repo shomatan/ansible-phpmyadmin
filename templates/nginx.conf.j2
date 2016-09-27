@@ -1,0 +1,31 @@
+# {{ ansible_managed }}
+
+server {
+
+  server_name _;
+  root        /var/www;
+  index       index.html index.php;
+
+  location ^~ /phpmyadmin {
+    access_log  /var/log/nginx/access-phpmyadmin.log;
+    error_log   /var/log/nginx/error-phpmyadmin.log error;
+
+    root {{ phpmyadmin_working_dir }};
+    index index.php;
+
+    {% if phpmyadmin_allow_hosts | length > 0 %}
+    {% for item in phpmyadmin_allow_hosts %}
+      allow {{ item }};
+    {% endfor %}
+      deny all;
+    {% endif %}
+
+    location ~ \.php$ {
+      fastcgi_split_path_info       ^(.+\.php)(/.+)$;
+      include                       fastcgi_params;
+      fastcgi_index                 index.php;
+      fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+      fastcgi_pass  unix:/var/run/php-fpm/php-fpm.sock;
+    }
+  }
+}

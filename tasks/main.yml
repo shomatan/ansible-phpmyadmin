@@ -62,4 +62,4 @@
   when: secret_empty == '0'
 
 # web server
-# - include: "{{ phpmyadmin_webserver_type }}.yml"
+- include: "{{ phpmyadmin_webserver_type }}.yml"

@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+Alias /phpmyadmin {{ phpmyadmin_install_dir }}
+<Location /phpmyadmin>
+{% if phpmyadmin_allow_hosts | length > 0 %}
+Order deny,allow
+Deny from all
+{% for item in phpmyadmin_allow_hosts %}
+Allow from {{ item }}
+{% endfor %}
+{% endif %}
+</Location>
