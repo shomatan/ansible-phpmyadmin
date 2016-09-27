@@ -39,17 +39,16 @@
 
 # blowfish_secret
 - name: Check blowfish_secret is empty.
-  shell: grep -o "\$cfg\['blowfish_secret'\] = '';" {{ phpmyadmin_install_dir }}/config.inc.php
-  register: result
+  shell: grep -o "\$cfg\['blowfish_secret'\] = '';" {{ phpmyadmin_install_dir }}/config.inc.php |wc -l
+  register: secret_empty
   changed_when: False
   ignore_errors: true
-- set_fact: secret_empty="{{ result.rc }}"
 
 - name: Generate blowfish_secret.
   shell: openssl rand -hex 32
   register: blowfish_secret
   changed_when: False
-  when: secret_empty == '0'
+  when: secret_empty.stdout == "1"
 
 - name: Edit phpMyAdmin configuration file.
   lineinfile:
@@ -59,7 +58,7 @@
     owner: "{{ phpmyadmin_web_user }}"
     group: "{{ phpmyadmin_web_group }}"
     mode: 00600
-  when: secret_empty == '0'
+  when: secret_empty.stdout == "1"
 
 # web server
 - include: "{{ phpmyadmin_webserver_type }}.yml"
