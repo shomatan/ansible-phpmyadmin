@@ -1,0 +1,65 @@
+---
+# install
+- name: Check composer.lock exist.
+  stat: path="{{ phpmyadmin_install_dir }}/composer.lock"
+  register: result
+- set_fact: phpmyadmin_installed="{{ result.stat.exists }}"
+
+- name: Install phpMyAdmin by composer
+  composer:
+    command: "create-project"
+    arguments: "phpmyadmin/phpmyadmin --repository-url=https://www.phpmyadmin.net/packages.json"
+    working_dir: "{{ phpmyadmin_working_dir }}"
+    prefer_dist: yes
+    no_dev: yes
+  when: phpmyadmin_installed != true
+
+# configure
+- name: Setup phpMyAdmin folder permission.
+  file:
+    path: "{{ phpmyadmin_install_dir }}"
+    state: directory
+    owner: "{{ phpmyadmin_web_user }}"
+    group: "{{ phpmyadmin_web_group }}"
+    recurse: yes
+
+- name: Check config.inc.php exist.
+  stat: path="{{ phpmyadmin_install_dir }}/config.inc.php"
+  register: result
+- set_fact: config_exists="{{ result.stat.exists }}"
+
+- name: Place phpMyAdmin configuration file.
+  copy:
+    src: config.inc.php
+    dest: "{{ phpmyadmin_install_dir }}/config.inc.php"
+    owner: "{{ phpmyadmin_web_user }}"
+    group: "{{ phpmyadmin_web_group }}"
+    mode: 00600
+  when: config_exists == false
+
+# blowfish_secret
+- name: Check blowfish_secret is empty.
+  shell: grep -o "\$cfg\['blowfish_secret'\] = '';" {{ phpmyadmin_install_dir }}/config.inc.php
+  register: result
+  changed_when: False
+  ignore_errors: true
+- set_fact: secret_empty="{{ result.rc }}"
+
+- name: Generate blowfish_secret.
+  shell: openssl rand -hex 32
+  register: blowfish_secret
+  changed_when: False
+  when: secret_empty == '0'
+
+- name: Edit phpMyAdmin configuration file.
+  lineinfile:
+    dest: "{{ phpmyadmin_install_dir }}/config.inc.php"
+    regexp: "\\$cfg\\['blowfish_secret'\\] = '.*?';"
+    line: "$cfg['blowfish_secret'] = '{{ blowfish_secret.stdout }}';"
+    owner: "{{ phpmyadmin_web_user }}"
+    group: "{{ phpmyadmin_web_group }}"
+    mode: 00600
+  when: secret_empty == '0'
+
+# web server
+# - include: "{{ phpmyadmin_webserver_type }}.yml"
